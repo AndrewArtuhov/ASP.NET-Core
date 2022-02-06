@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ASP.NET_Core.Migrations
 {
-    [DbContext(typeof(DataModel.BloggingContext))]
+    [DbContext(typeof(DataModel))]
     [Migration("20220206184543_InitialCreate")]
     partial class InitialCreate
     {

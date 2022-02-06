@@ -1,5 +1,7 @@
+using ASP.NET_Core.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,38 +21,23 @@ namespace ASP.NET_Core
         }
 
         public IConfiguration Configuration { get; }
+        public record Person(string Name, string Age);
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddControllersWithViews();
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+            var profiles = new List<Profile>();
+            using (var db = new DataModel())
             {
-                app.UseDeveloperExceptionPage();
+                profiles = db.Profiles.ToList();
             }
-            else
+            app.Run(async (context) =>
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                List<Person> person = new List<Person>();
+                foreach (var profile in profiles)
+                {
+                    person.Add(new(profile.Name, profile.Age));                  
+                }
+                await context.Response.WriteAsJsonAsync(person);
             });
         }
     }
